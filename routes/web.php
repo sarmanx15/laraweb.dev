@@ -55,3 +55,7 @@ Route::get('setting/profile', 'SettingController@profile');
 //Mengubah profil diri
 Route::get('settings/profile/edit', 'SettingController@editProfile');
 Route::post('settings/profile', 'SettingController@updateProfile');
+
+//MMengubah password setelah login
+Route::get('settings/password', 'SettingController@editPassword');
+Route::post('settings/password', 'SettingController@updatePassword');

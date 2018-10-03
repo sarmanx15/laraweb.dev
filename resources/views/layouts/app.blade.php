@@ -80,10 +80,11 @@
                             </a>
 
                             <ul class="dropdown-menu" role="menu">
+                                <li><a href="{{ url('/settings/password') }}"><i class="fa fa-btn fa-lock"></i> Ubah Password</a></li>
                                 <li>
                                     <a href="{{ route('logout') }}"
                                     onclick="event.preventDefault();
-                                    document.getElementById('logout-form').submit();">
+                                    document.getElementById('logout-form').submit();"><i class="fa fa-btn fa-sign-out"></i>
                                     Logout
                                 </a>
 
