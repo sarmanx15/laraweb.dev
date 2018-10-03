@@ -61,6 +61,10 @@
                         <li><a href="{{ route('books.index') }}">Buku</a></li>
                         @endrole
 
+                        @if(auth()->check())
+                        <li><a href="{{ url('/setting/profile') }}">Profile</a></li>
+                        @endif
+
                     </ul>
 
                     <!-- Right Side Of Navbar -->

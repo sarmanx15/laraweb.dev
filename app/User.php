@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laratrust\Traits\LaratrustUserTrait;
+use Illuminate\Support\Facades\Mail;
 
 use App\Book;
 use App\BorrowLog;
@@ -21,6 +22,9 @@ class User extends Authenticatable
      *
      * @var array
      */
+    protected $casts = [
+        'is_verified' => 'boolean',
+    ];
     protected $fillable = [
         'name', 'email', 'password',
     ];
@@ -36,9 +40,14 @@ class User extends Authenticatable
 
 
     public function borrow(Book $book){
+        // CEK APAKAH MASH ADA STOK BUKU
+        if($book->stock < 1){
+            throw new BookException("Buku \" $book->title\" sedang tidak tersedia.");
+            
+        }
         // CEK APAKAH BUKU INI SEDANG DIPINJAM OLEH USER
         if($this->BorrowLogs()->where('book_id', $book->id)->where('is_returned', 0)->count() > 0){
-            throw new BookException("Buku $book->title sedang Anda Pinjam.");
+            throw new BookException("Buku \"$book->title\" sedang Anda Pinjam.");
             
         }
 
@@ -46,7 +55,35 @@ class User extends Authenticatable
         return $borrowLog;
     }
 
-    public function borrowLog(){
+    public function borrowLogs(){
         return $this->hasMany('App\BorrowLog');
     }
+
+    // jiks udrt ada token pada field verification_token maka kita pake token itu lagi
+    public function generateVerificationToken(){
+        $token = $this->verification_token;
+        if(!$token){
+            $token = str_random(40);
+            $this->verification_token = $token;
+            $this->save();
+        }
+        return $token;
+    }
+
+    public function sendVerification(){
+        $token = $this->generateVerificationToken();
+        $user = $this;
+        
+        Mail::send('auth.emails.verification', compact('user', 'token'), function($m) use($user){
+            $m->to($user->email, $user->name)->subject('Verifikasi Akun Larapus.');
+        });
+    }
+
+    public function verify(){
+        $this->is_verified=1;
+        $this->verification_token = null;
+        $this->save();
+    }
+
+
 }

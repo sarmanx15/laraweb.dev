@@ -157,7 +157,8 @@ class BooksController extends Controller
         // ]);
 
         $book = Book::find($id);
-        $book->update($request->all());
+        // $book->update($request->all());
+        if(!$book->update($request->all())) return redirect()->back();
 
         if ($request->hasFile('cover')){
             // mengambil cover yang diupload berikut dnegan ekstensinya
@@ -206,21 +207,24 @@ class BooksController extends Controller
     {
         //
         $book = Book::find($id);
+        $cover = $book->cover;
+        if(!$book->delete()) return redirect()->back();
 
         // hapus cover lama jika ada
-        // if($book->cover){
-        //     $old_cover  = $book->cover;
-        //     $filepath   = public_path.DIRECTORY_SEPARATOR.'img'.DIRECTORY_SEPARATOR.$book->cover;
+        if($cover){
+            $old_cover  = $book->cover;
+            $filepath   = public_path.DIRECTORY_SEPARATOR.'img'.DIRECTORY_SEPARATOR.$book->cover;
 
-        //     try{
-        //         File::delete($filepath);
-        //     }catch(FileNotFoundException $e){
-        //         // file sudah dihapus
-        //     }
-        // }
-        $this->hapus_cover($book);
+            try{
+                File::delete($filepath);
+            }catch(FileNotFoundException $e){
+                // file sudah dihapus
+            }
+        }
+        
+        // $this->hapus_cover($book);
 
-        $book->delete();
+        // $book->delete();
         Session::flash("flash_notification", [
             "level"=>"success",
             "message"=>"Buku berhasil dihapus"
@@ -253,5 +257,22 @@ class BooksController extends Controller
         }
 
         return redirect('/');
+    }
+
+    public function  returnBack($book_id){
+        $borrowLog = BorrowLog::where('user_id', Auth::user()->id)
+        ->where('book_id', $book_id)
+        ->where('is_returned', 0)
+        ->first();
+
+        if($borrowLog){
+            $borrowLog->is_returned = true;
+            $borrowLog->save();
+
+            Session::flash("flash_notification", [
+                "level" => "success",
+                "message" => "Berhasil mengembalikan ".$borrowLog->book->title]);
+        }
+        return redirect('/home');
     }
 }

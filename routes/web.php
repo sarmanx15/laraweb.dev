@@ -37,3 +37,21 @@ Route::get('books/{book}/borrow',[
 	'as'			=> 'guest.books.borrow',
 	'uses'			=> 'BooksController@borrow'
 ]);
+
+Route::put('book/{book}/return',[
+'middleware'	=> ['auth', 'role:member'],
+'as'			=>'member.books.return',
+'uses' 			=>'BooksController@returnBack'
+]);
+
+Route::get('auth/verify/{token}', 'Auth\RegisterController@verify');
+
+//Mengirim ulang link verifikasi
+Route::get('auth/send-verification', 'Auth\RegisterController@sendVerification');
+
+// Membuat halaman profil
+Route::get('setting/profile', 'SettingController@profile');
+
+//Mengubah profil diri
+Route::get('settings/profile/edit', 'SettingController@editProfile');
+Route::post('settings/profile', 'SettingController@updateProfile');
